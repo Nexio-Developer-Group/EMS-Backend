@@ -1,15 +1,5 @@
 // user controller
 const userService = require('../services/user');
-// user signUp controller
-async function signUp(req, res) {
-  try {
-    const { phone, email, name } = req.body;
-      await userService.signUpUser({ name, email, phone });
-    res.status(201).json({ msg: 'User registered successfully, OTP sent' });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-}
 
 // user verify OTP controller
 async function verifyOtp(req, res) {
@@ -33,4 +23,4 @@ async function login(req, res) {
   }
 }
 
-module.exports = { signUp, verifyOtp, login };
+module.exports = { verifyOtp, login };

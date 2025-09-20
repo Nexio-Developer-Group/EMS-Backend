@@ -5,26 +5,7 @@ const Otp = require('../models/otp');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
-// user signUp service
-async function signUpUser({ name, email, phone }) {
-  if (!name || !email || !phone) {
-    throw new Error('name, email, phone are required');
-  }
-  // Check if user already exists
-  const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-  if (existingUser) {
-    throw new Error('User already exists');
-  }
-
-  // call otp service to send OTP
-  await otpService.generateAndSendOtp(phone);
-  const user_id = new mongoose.Types.ObjectId().toString();
-
-  const user = await User.create({ user_id, name, email, phone });
-
-  return user;
-}
-
+ 
 // verify OTP service
 async function verifyOtp(phone, otp) {
   const isValid = await otpService.validateOtp(phone, otp);
@@ -57,7 +38,8 @@ async function loginUser(phone) {
   }
   const user = await User.findOne({ phone });
   if (!user) {
-    throw new Error('User not found');
+      const user_id = new mongoose.Types.ObjectId().toString();
+       await User.create({ user_id, phone });
   }
 
    await otpService.generateAndSendOtp(phone);
@@ -65,4 +47,4 @@ async function loginUser(phone) {
   return { message: 'OTP sent for login. Please verify.' };
 }
 
-module.exports = { signUpUser, verifyOtp, loginUser };
+module.exports = { verifyOtp, loginUser };
