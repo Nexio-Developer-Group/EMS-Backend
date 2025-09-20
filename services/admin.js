@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user'); // make sure the path is correct
+const User = require('../models/user');  
 
-// optional: define role map if you want to use roleLevel numbers
+ 
 const roleMap = { 1: 'user', 2: 'admin', 3: 'developer' };
  
 async function createUserAndToken(userData, creatorUser) {
@@ -11,9 +11,10 @@ async function createUserAndToken(userData, creatorUser) {
     throw new Error('user_id, name, email, and phone are required');
   }
  
-  // Determine role
+   
   let assignedRole = 'user';
   if (roles && roleMap[roles]) {
+
     // Hierarchy check: cannot assign role higher than creator
     if (creatorUser &&  creatorUser.roles > roles) {
       throw new Error('Cannot assign a higher role than your own');
