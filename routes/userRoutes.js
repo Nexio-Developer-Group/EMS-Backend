@@ -6,5 +6,6 @@ const { authMiddleware } = require('../middlewares/authMiddleware');
 
 router.post('/signup', userController.signUp);
 router.post('/verify-otp', userController.verifyOtp);
+router.post('/login', userController.login);
 
 module.exports = router;

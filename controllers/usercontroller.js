@@ -22,4 +22,15 @@ async function verifyOtp(req, res) {
   }
 }
 
-module.exports = { signUp, verifyOtp };
+// user login controller
+async function login(req, res) {
+  try {
+    const { phone } = req.body;
+    const { message } = await userService.loginUser(phone);
+    res.status(200).json({ msg: message });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports = { signUp, verifyOtp, login };

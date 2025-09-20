@@ -50,4 +50,19 @@ async function verifyOtp(phone, otp) {
   return { user, token };
 }
 
-module.exports = { signUpUser, verifyOtp };
+// user login service
+async function loginUser(phone) {
+  if (!phone) {
+    throw new Error('phone is required');
+  }
+  const user = await User.findOne({ phone });
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+   await otpService.generateAndSendOtp(phone);
+
+  return { message: 'OTP sent for login. Please verify.' };
+}
+
+module.exports = { signUpUser, verifyOtp, loginUser };
