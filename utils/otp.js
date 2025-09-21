@@ -10,7 +10,7 @@ const client = twilio(accountSid, authToken);
 
 // Generate and send OTP
 async function generateAndSendOtp(phone) {
-  const otp = crypto.randomInt(100000, 999999).toString();
+  const otp = crypto.randomInt(1000, 9999).toString();
 
   // Save OTP to DB (overwrite old OTP for same phone)
   await Otp.findOneAndUpdate(
