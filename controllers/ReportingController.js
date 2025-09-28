@@ -1,6 +1,5 @@
 // controllers/ReportingController.js
 const Bill = require('../models/Bill');
-const mongoose = require('mongoose');
 
 // Helper to get start and end dates based on period
 const getDateRange = (period) => {
@@ -37,9 +36,7 @@ const getDateRange = (period) => {
 
 const getDashboardStats = async (req, res) => {
   try {
-    // Read query params
     const { period = 'daily', startDate, endDate } = req.query;
-
     let start, end;
 
     if (startDate && endDate) {
@@ -52,24 +49,18 @@ const getDashboardStats = async (req, res) => {
       end = range.end;
     }
 
-    // Fetch bills in range
     const bills = await Bill.find({
       createdAt: { $gte: start, $lte: end },
     }).lean();
 
-    // Total bills
+    // Calculate stats
     const totalBills = bills.length;
-
-    // Total grandTotal sum
     const totalAmount = bills.reduce((acc, bill) => acc + bill.grandTotal, 0);
-
-    // Average discount %
     const avgDiscount =
       bills.length > 0
         ? bills.reduce((acc, bill) => acc + (bill.discount / bill.subTotal) * 100, 0) / bills.length
         : 0;
 
-    // Most active 4-hour segment
     const segments = {
       '00:00-03:59': 0,
       '04:00-07:59': 0,
@@ -81,11 +72,11 @@ const getDashboardStats = async (req, res) => {
 
     bills.forEach((bill) => {
       const hour = new Date(bill.createdAt).getHours();
-      if (hour >= 0 && hour < 4) segments['00:00-03:59']++;
-      else if (hour >= 4 && hour < 8) segments['04:00-07:59']++;
-      else if (hour >= 8 && hour < 12) segments['08:00-11:59']++;
-      else if (hour >= 12 && hour < 16) segments['12:00-15:59']++;
-      else if (hour >= 16 && hour < 20) segments['16:00-19:59']++;
+      if (hour < 4) segments['00:00-03:59']++;
+      else if (hour < 8) segments['04:00-07:59']++;
+      else if (hour < 12) segments['08:00-11:59']++;
+      else if (hour < 16) segments['12:00-15:59']++;
+      else if (hour < 20) segments['16:00-19:59']++;
       else segments['20:00-23:59']++;
     });
 
@@ -98,28 +89,35 @@ const getDashboardStats = async (req, res) => {
     const newCustomers = new Set();
 
     for (const bill of bills) {
-      const pastBills = await Bill.findOne({
+      const pastBill = await Bill.findOne({
         phone: bill.phone,
         createdAt: { $lt: start },
       });
-      if (pastBills) recurringCustomers.add(bill.phone);
+      if (pastBill) recurringCustomers.add(bill.phone);
       else newCustomers.add(bill.phone);
     }
 
-    return res.json({
-      totalBills,
-      totalAmount,
-      avgDiscount: avgDiscount.toFixed(2),
-      mostActiveSegment,
-      recurringCustomers: recurringCustomers.size,
-      newCustomers: newCustomers.size,
+    // Standard response format
+    res.json({
+      status: 1,
+      data: {
+        totalBills,
+        totalAmount,
+        avgDiscount: avgDiscount.toFixed(2),
+        mostActiveSegment,
+        recurringCustomers: recurringCustomers.size,
+        newCustomers: newCustomers.size,
+      },
+      message: 'Dashboard stats fetched',
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server Error', error });
+    res.status(500).json({
+      status: 0,
+      message: 'Server error',
+      error: error.message,
+    });
   }
 };
 
-module.exports = {
-  getDashboardStats,
-};
+module.exports = { getDashboardStats };
