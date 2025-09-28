@@ -4,6 +4,9 @@ const router = express.Router();
 const itemController = require('../controllers/itemController');
 const { authMiddleware, requireRole } = require('../middlewares/authMiddleware');
 
+// Get all items with filters, pagination, and sorting (admin only)
+router.get('/', authMiddleware, requireRole('admin'), itemController.getAllItems);
+
 // Create a new item (admin only)
 router.post('/', authMiddleware, requireRole('admin'), itemController.createItem);
 
@@ -15,9 +18,6 @@ router.delete('/:id', authMiddleware, requireRole('admin'), itemController.delet
 
 // Get a single item by ID (admin only)
 router.get('/:id', authMiddleware, requireRole('admin'), itemController.getItemById);
-
-// Get all items with filters, pagination, and sorting (admin only)
-router.get('/all', authMiddleware, requireRole('admin'), itemController.getAllItems);
 
 // Search items by query (admin only)
 router.get('/search', authMiddleware, requireRole('admin'), itemController.searchItems);
