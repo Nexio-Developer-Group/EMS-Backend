@@ -45,7 +45,17 @@ exports.createBill = async (req, res) => {
 
     const grandTotal = subTotal - discount;
 
+    // Generate unique billId
+    const lastBill = await Bill.findOne().sort({ createdAt: -1 });
+    let nextNumber = 1;
+    if (lastBill && lastBill.billId) {
+      const lastNum = parseInt(lastBill.billId.replace('VANS', ''), 10);
+      nextNumber = lastNum + 1;
+    }
+    const billId = `VANS${String(nextNumber).padStart(4, '0')}`;
+
     const bill = new Bill({
+      billId,           // explicitly set billId
       user: user._id,
       items: billItems,
       subTotal,
@@ -62,6 +72,7 @@ exports.createBill = async (req, res) => {
     res.status(500).json({ status: 0, message: 'Server error', error: error.message });
   }
 };
+
 
 // ─── EDIT BILL ─────────────────────────────
 exports.editBill = async (req, res) => {
