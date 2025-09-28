@@ -7,12 +7,12 @@ const toIST = (date) => {
   return new Date(utc.getTime() + istOffset * 60000);
 };
 
-// Shop segments (9AM-12PM, 12PM-3PM, 3PM-6PM)
+// Shop segments
 const shopSegments = [
   { label: '09:00 AM - 11:59 AM', start: 9, end: 11 },
   { label: '12:00 PM - 02:59 PM', start: 12, end: 14 },
   { label: '03:00 PM - 05:59 PM', start: 15, end: 17 },
-  { label: '06:00 PM - 10:59 PM', start: 18, end: 22 },
+  { label: '06:00 PM - 10:59 PM', start: 18, end: 22 }, // corrected
 ];
 
 const getDashboardStats = async (req, res) => {
@@ -22,7 +22,6 @@ const getDashboardStats = async (req, res) => {
     let start = startDate ? new Date(startDate) : new Date();
     let end = endDate ? new Date(endDate) : new Date();
 
-    // Set daily start/end if no dates
     if (!startDate) start.setHours(0, 0, 0, 0);
     if (!endDate) end.setHours(23, 59, 59, 999);
 
@@ -30,7 +29,6 @@ const getDashboardStats = async (req, res) => {
       createdAt: { $gte: start, $lte: end },
     }).lean();
 
-    // Stats
     const totalBills = bills.length;
     const totalAmount = bills.reduce((acc, bill) => acc + bill.grandTotal, 0);
     const avgDiscount =
