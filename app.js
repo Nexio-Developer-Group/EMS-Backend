@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const billRoutes = require('./routes/billRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 dotenv.config();
 connectDB();
@@ -21,6 +22,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/item', itemRoutes);
 app.use('/api/bill', billRoutes);
+app.use('/api/report', reportRoutes);
 
 
 module.exports = app;
