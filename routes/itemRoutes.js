@@ -5,7 +5,7 @@ const itemController = require('../controllers/itemController');
 const { authMiddleware, requireRole } = require('../middlewares/authMiddleware');
 
 // Get all items with filters, pagination, and sorting (admin only)
-router.get('/', authMiddleware, requireRole('admin'), itemController.getAllItems);
+router.get('/', itemController.getAllItems);
 
 // Create a new item (admin only)
 router.post('/', authMiddleware, requireRole('admin'), itemController.createItem);
