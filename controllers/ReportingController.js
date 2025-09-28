@@ -1,4 +1,3 @@
-// controllers/ReportingController.js
 const Bill = require('../models/Bill');
 
 // Helper to get start and end dates based on period
@@ -11,18 +10,15 @@ const getDateRange = (period) => {
       start = new Date(now.setHours(0, 0, 0, 0));
       end = new Date(now.setHours(23, 59, 59, 999));
       break;
-
     case 'weekly':
       const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
       start = new Date(firstDayOfWeek.setHours(0, 0, 0, 0));
       end = new Date(now.setHours(23, 59, 59, 999));
       break;
-
     case 'monthly':
       start = new Date(now.getFullYear(), now.getMonth(), 1);
       end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
       break;
-
     default:
       start = new Date();
       start.setHours(0, 0, 0, 0);
@@ -61,23 +57,20 @@ const getDashboardStats = async (req, res) => {
         ? bills.reduce((acc, bill) => acc + (bill.discount / bill.subTotal) * 100, 0) / bills.length
         : 0;
 
+    // Shop operating hour segments (9 AM to 12 PM, 12 PM to 3 PM, 3 PM to 6 PM)
     const segments = {
-      '00:00-03:59': 0,
-      '04:00-07:59': 0,
-      '08:00-11:59': 0,
-      '12:00-15:59': 0,
-      '16:00-19:59': 0,
-      '20:00-23:59': 0,
+      '09:00-11:59': 0,
+      '12:00-14:59': 0,
+      '15:00-17:59': 0,
+      '18:00-20:59': 0, // optional for late orders
     };
 
     bills.forEach((bill) => {
       const hour = new Date(bill.createdAt).getHours();
-      if (hour < 4) segments['00:00-03:59']++;
-      else if (hour < 8) segments['04:00-07:59']++;
-      else if (hour < 12) segments['08:00-11:59']++;
-      else if (hour < 16) segments['12:00-15:59']++;
-      else if (hour < 20) segments['16:00-19:59']++;
-      else segments['20:00-23:59']++;
+      if (hour >= 9 && hour < 12) segments['09:00-11:59']++;
+      else if (hour >= 12 && hour < 15) segments['12:00-14:59']++;
+      else if (hour >= 15 && hour < 18) segments['15:00-17:59']++;
+      else if (hour >= 18 && hour < 21) segments['18:00-20:59']++;
     });
 
     const mostActiveSegment = Object.keys(segments).reduce((a, b) =>
@@ -97,7 +90,6 @@ const getDashboardStats = async (req, res) => {
       else newCustomers.add(bill.phone);
     }
 
-    // Standard response format
     res.json({
       status: 1,
       data: {
