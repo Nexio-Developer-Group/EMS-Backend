@@ -1,7 +1,6 @@
 // controllers/itemController.js
 const mongoose = require('mongoose');
 const Item = require('../models/Item');
-const { isValidObjectId } = require('mongoose');
 
 // Utility: validate MongoDB ObjectId
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
