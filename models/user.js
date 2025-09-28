@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
   user_id: { type: String, required: true, unique: true },
   name: { type: String },
   email: { type: String, unique: true, sparse: true }, // allow multiple nulls
+  avatar: { type: String },
   phone: { type: String, required: true, unique: true },
   roles: { type: [String], default: ['user'] },
   createdAt: { type: Date, default: Date.now }
