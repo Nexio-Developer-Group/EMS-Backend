@@ -1,6 +1,7 @@
 // controllers/itemController.js
 const mongoose = require('mongoose');
 const Item = require('../models/Item');
+const { isValidObjectId } = require('mongoose');
 
 // Utility: validate MongoDB ObjectId
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -133,7 +134,7 @@ const getItemById = async (req, res) => {
   }
 };
 
-// Get all items (with filters, pagination, sorting)
+
 const getAllItems = async (req, res) => {
   try {
     const {
@@ -143,11 +144,19 @@ const getAllItems = async (req, res) => {
       order = 'desc',
       category,
       activeOnly,
+      search,
     } = req.query;
 
     const filter = {};
+
     if (category && isValidObjectId(category)) filter.category = category;
     if (activeOnly === 'true') filter.isActive = true;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     const sort = { [sortBy]: order === 'asc' ? 1 : -1 };
 
@@ -172,6 +181,7 @@ const getAllItems = async (req, res) => {
     });
   }
 };
+
 
 // Search items
 const searchItems = async (req, res) => {
