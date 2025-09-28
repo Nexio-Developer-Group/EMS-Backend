@@ -1,5 +1,5 @@
-// models/Item.js
 const mongoose = require('mongoose');
+const crypto = require('crypto'); // for generating unique SKU
 
 const itemSchema = new mongoose.Schema(
   {
@@ -29,7 +29,7 @@ const itemSchema = new mongoose.Schema(
     },
     images: [
       {
-        type: String, // store URLs of images
+        type: String,
         validate: {
           validator: function (v) {
             return /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif)$/i.test(v);
@@ -69,7 +69,6 @@ const itemSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
-    // 🚨 Removed stock field
   },
   {
     timestamps: true,
@@ -88,15 +87,21 @@ itemSchema.virtual('formattedPrice').get(function () {
   return `₹${this.price.toFixed(2)}`;
 });
 
+// 🔹 Pre-save hook to generate SKU if not provided
+itemSchema.pre('save', function (next) {
+  if (!this.sku) {
+    this.sku = `SKU-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+  }
+  next();
+});
+
 // 🔹 Static Methods (CRUD + utilities)
 itemSchema.statics = {
-  // Create new item
   async createItem(data) {
     const item = new this(data);
     return item.save();
   },
 
-  // Update item
   async updateItem(id, updateData) {
     return this.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -104,17 +109,14 @@ itemSchema.statics = {
     });
   },
 
-  // Delete item
   async deleteItem(id) {
     return this.findByIdAndDelete(id);
   },
 
-  // Get item by ID (with category populated)
   async getItemById(id) {
     return this.findById(id).populate('category', 'name isActive');
   },
 
-  // Get all items (filter, pagination, sorting)
   async getAllItems({ filter = {}, page = 1, limit = 10, sort = { createdAt: -1 } }) {
     const skip = (page - 1) * limit;
     const items = await this.find(filter)
@@ -127,23 +129,18 @@ itemSchema.statics = {
     return { items, total, page, pages: Math.ceil(total / limit) };
   },
 
-  // Search items by name/description/tags
   async searchItems(query, page = 1, limit = 10) {
     const regex = new RegExp(query, 'i');
     const filter = { $or: [{ name: regex }, { description: regex }, { tags: regex }] };
     return this.getAllItems({ filter, page, limit });
   },
 
-  // 🚨 Removed updateStock
-
-  // Add rating (update average and count)
   async addRating(id, rating) {
     const item = await this.findById(id);
     if (!item) throw new Error('Item not found');
 
     const newCount = item.ratings.reviewsCount + 1;
-    const newAvg =
-      (item.ratings.average * item.ratings.reviewsCount + rating) / newCount;
+    const newAvg = (item.ratings.average * item.ratings.reviewsCount + rating) / newCount;
 
     item.ratings.average = newAvg;
     item.ratings.reviewsCount = newCount;
