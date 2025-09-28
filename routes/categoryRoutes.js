@@ -3,6 +3,10 @@ const router = express.Router();
 const categoryController = require('../controllers/categoryController');
 const { authMiddleware, requireRole } = require('../middlewares/authMiddleware');
 
+
+// Get all categories
+router.get('/', authMiddleware, requireRole('admin'), categoryController.getAllCategories);
+
 // Create a new category
 router.post('/', authMiddleware, requireRole('admin'), categoryController.createCategory);
 
@@ -15,7 +19,5 @@ router.delete('/:id', authMiddleware, requireRole('admin'), categoryController.d
 // Get a single category by ID
 router.get('/:id', authMiddleware, requireRole('admin'), categoryController.getCategoryById);
 
-// Get all categories
-router.get('/all', authMiddleware, requireRole('admin'), categoryController.getAllCategories);
 
 module.exports = router;

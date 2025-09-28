@@ -6,9 +6,18 @@ const Category = require('../models/Category');
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 // Create a new category
+// controllers/categoryController.js
 const createCategory = async (req, res) => {
   try {
-    const category = await Category.createCategory(req.body);
+    const data = { ...req.body };
+
+    // If parentCategory is empty string, make it null
+    if (!data.parentCategory || data.parentCategory === '') {
+      data.parentCategory = null;
+    }
+
+    const category = await Category.createCategory(data);
+
     res.status(201).json({
       status: 1,
       data: category,
@@ -22,6 +31,7 @@ const createCategory = async (req, res) => {
     });
   }
 };
+
 
 // Update a category
 const updateCategory = async (req, res) => {
