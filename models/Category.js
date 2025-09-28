@@ -1,5 +1,4 @@
 // models/Category.js
-
 const mongoose = require('mongoose');
 
 const categorySchema = new mongoose.Schema(
@@ -9,10 +8,13 @@ const categorySchema = new mongoose.Schema(
       required: [true, 'Category name is required'],
       unique: true,
       trim: true,
+      minlength: [2, 'Category name must be at least 2 characters long'],
+      maxlength: [100, 'Category name must be at most 100 characters long'],
     },
     description: {
       type: String,
       trim: true,
+      maxlength: [500, 'Description cannot exceed 500 characters'],
     },
     parentCategory: {
       type: mongoose.Schema.Types.ObjectId,
@@ -22,40 +24,68 @@ const categorySchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+      index: true, // improve query performance
     },
   },
   {
-    timestamps: true, 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-categorySchema.index({ name: 1 });
+// 🔹 Indexes for faster queries
+categorySchema.index({ name: 1 }, { unique: true });
+categorySchema.index({ parentCategory: 1 });
 
+// 🔹 Virtual field to count child categories
+categorySchema.virtual('subCategories', {
+  ref: 'Category',
+  localField: '_id',
+  foreignField: 'parentCategory',
+});
+
+// 🔹 Pre-hook to prevent circular references
+categorySchema.pre('save', async function (next) {
+  if (this.parentCategory && this.parentCategory.equals(this._id)) {
+    return next(new Error('Category cannot be its own parent.'));
+  }
+  next();
+});
+
+// Static methods
 categorySchema.statics = {
-  // Create a new category
   async createCategory(data) {
     const category = new this(data);
     return category.save();
   },
 
-  // Update a category by ID
   async updateCategory(id, updateData) {
-    return this.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    return this.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
   },
 
-  // Delete a category by ID
   async deleteCategory(id) {
+    // Optional: check for child categories before deleting
+    const hasChildren = await this.exists({ parentCategory: id });
+    if (hasChildren) {
+      throw new Error('Cannot delete category with subcategories.');
+    }
     return this.findByIdAndDelete(id);
   },
 
-  // Optional: Get category by ID
   async getCategoryById(id) {
-    return this.findById(id).populate('parentCategory');
+    return this.findById(id)
+      .populate('parentCategory', 'name')
+      .populate('subCategories', 'name isActive');
   },
 
-  // Optional: Get all categories (with optional filter)
   async getAllCategories(filter = {}) {
-    return this.find(filter).populate('parentCategory').sort({ name: 1 });
+    return this.find(filter)
+      .populate('parentCategory', 'name')
+      .sort({ createdAt: -1 });
   },
 };
 

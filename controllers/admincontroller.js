@@ -1,6 +1,6 @@
 // Admin Controller
 const { mongo, default: mongoose } = require('mongoose');
-const User = require('../models/user');
+const User = require('../models/User');
 const adminservices = require('../services/admin');
 
 // Create a new user (admin function)

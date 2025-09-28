@@ -1,5 +1,5 @@
 // user services
-const User = require('../models/user');
+const User = require('../models/User');
 const otpService = require('../utils/otp');
 const Otp = require('../models/otp');
 const mongoose = require('mongoose');

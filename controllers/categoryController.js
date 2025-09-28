@@ -1,4 +1,9 @@
+// controllers/categoryController.js
+const mongoose = require('mongoose');
 const Category = require('../models/Category');
+
+// Utility: validate MongoDB ObjectId
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 // Create a new category
 const createCategory = async (req, res) => {
@@ -8,14 +13,12 @@ const createCategory = async (req, res) => {
       status: 1,
       data: category,
       message: 'Category created successfully',
-      error: null
     });
   } catch (error) {
     res.status(400).json({
       status: 0,
-      data: null,
       message: 'Failed to create category',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -24,27 +27,33 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        status: 0,
+        message: 'Invalid category ID',
+        error: 'Invalid ID format',
+      });
+    }
+
     const updatedCategory = await Category.updateCategory(id, req.body);
     if (!updatedCategory) {
       return res.status(404).json({
         status: 0,
-        data: null,
         message: 'Category not found',
-        error: 'No category with this ID'
+        error: 'No category with this ID',
       });
     }
+
     res.json({
       status: 1,
       data: updatedCategory,
       message: 'Category updated successfully',
-      error: null
     });
   } catch (error) {
     res.status(400).json({
       status: 0,
-      data: null,
       message: 'Failed to update category',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -53,27 +62,33 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        status: 0,
+        message: 'Invalid category ID',
+        error: 'Invalid ID format',
+      });
+    }
+
     const deletedCategory = await Category.deleteCategory(id);
     if (!deletedCategory) {
       return res.status(404).json({
         status: 0,
-        data: null,
         message: 'Category not found',
-        error: 'No category with this ID'
+        error: 'No category with this ID',
       });
     }
+
     res.json({
       status: 1,
       data: deletedCategory,
       message: 'Category deleted successfully',
-      error: null
     });
   } catch (error) {
     res.status(400).json({
       status: 0,
-      data: null,
       message: 'Failed to delete category',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -82,27 +97,33 @@ const deleteCategory = async (req, res) => {
 const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        status: 0,
+        message: 'Invalid category ID',
+        error: 'Invalid ID format',
+      });
+    }
+
     const category = await Category.getCategoryById(id);
     if (!category) {
       return res.status(404).json({
         status: 0,
-        data: null,
         message: 'Category not found',
-        error: 'No category with this ID'
+        error: 'No category with this ID',
       });
     }
+
     res.json({
       status: 1,
       data: category,
       message: 'Category fetched successfully',
-      error: null
     });
   } catch (error) {
     res.status(400).json({
       status: 0,
-      data: null,
       message: 'Failed to fetch category',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -110,24 +131,24 @@ const getCategoryById = async (req, res) => {
 // Get all categories
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.getAllCategories();
+    const { activeOnly } = req.query;
+    const filter = activeOnly === 'true' ? { isActive: true } : {};
+
+    const categories = await Category.getAllCategories(filter);
     res.json({
       status: 1,
       data: categories,
       message: 'Categories fetched successfully',
-      error: null
     });
   } catch (error) {
     res.status(400).json({
       status: 0,
-      data: null,
       message: 'Failed to fetch categories',
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-// Export each function separately
 module.exports = {
   createCategory,
   updateCategory,

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');  
+const User = require('../models/User');  
 
  
 const roleMap = { 1: 'user', 2: 'admin', 3: 'developer' };
