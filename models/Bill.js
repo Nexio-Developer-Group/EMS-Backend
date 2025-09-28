@@ -40,6 +40,12 @@ const billSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
     items: [billItemSchema],
     subTotal: {
       type: Number,

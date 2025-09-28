@@ -57,7 +57,7 @@ exports.createBill = async (req, res) => {
     const bill = new Bill({
       billId,           // explicitly set billId
       user: user._id,
-      phone: phone,
+      phone: user.phone,
       items: billItems,
       subTotal,
       discount,
