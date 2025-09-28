@@ -12,7 +12,7 @@ const shopSegments = [
   { label: '09:00 AM - 11:59 AM', start: 9, end: 11 },
   { label: '12:00 PM - 02:59 PM', start: 12, end: 14 },
   { label: '03:00 PM - 05:59 PM', start: 15, end: 17 },
-  { label: '06:00 PM - 10:59 PM', start: 15, end: 17 },
+  { label: '06:00 PM - 10:59 PM', start: 18, end: 22 },
 ];
 
 const getDashboardStats = async (req, res) => {
