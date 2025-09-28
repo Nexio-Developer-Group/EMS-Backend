@@ -90,7 +90,7 @@ billSchema.pre('save', async function (next) {
       nextNumber = lastNum + 1;
     }
 
-    this.billId = `VANS${String(nextNumber).padStart(4, '0')}`;
+    this.billId = `VANS${String(nextNumber).padStart(6, '0')}`;
   }
   next();
 });

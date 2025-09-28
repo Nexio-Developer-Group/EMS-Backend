@@ -4,6 +4,11 @@ const router = express.Router();
 const billController = require('../controllers/billController');
 const { authMiddleware, requireRole } = require('../middlewares/authMiddleware');
 
+
+
+// Get all bills with optional filters (admin only)
+router.get('/', authMiddleware, requireRole('admin'), billController.getAllBills);
+
 // Create a new bill (admin only)
 router.post('/', authMiddleware, requireRole('admin'), billController.createBill);
 
@@ -19,8 +24,6 @@ router.delete('/:id', authMiddleware, requireRole('admin'), billController.delet
 // Get bill by billId (admin only)
 router.get('/id/:billId', authMiddleware, requireRole('admin'), billController.getBillByBillId);
 
-// Get all bills with optional filters (admin only)
-router.get('/all', authMiddleware, requireRole('admin'), billController.getAllBills);
 
 // Search users by phone number (admin only)
 router.get('/users/search', authMiddleware, requireRole('admin'), billController.searchUserByPhone);

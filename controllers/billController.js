@@ -52,7 +52,7 @@ exports.createBill = async (req, res) => {
       const lastNum = parseInt(lastBill.billId.replace('VANS', ''), 10);
       nextNumber = lastNum + 1;
     }
-    const billId = `VANS${String(nextNumber).padStart(4, '0')}`;
+    const billId = `VANS${String(nextNumber).padStart(6, '0')}`;
 
     const bill = new Bill({
       billId,           // explicitly set billId
